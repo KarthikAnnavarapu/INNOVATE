@@ -1,0 +1,17 @@
+def detect_pedestrians(image, model):
+    # Preprocess the image
+    image_resized = cv2.resize(image, (8, 8)) # Resize to match the digits dataset
+    # Convert to grayscale to match the digits dataset
+    image_gray = cv2.cvtColor(image_resized, cv2.COLOR_BGR2GRAY)
+    # Reshape the image to a 1D array (like the digits dataset)
+    image_flattened = image_gray.flatten()
+    # Reshape to a 2D array for prediction (samples x features)
+    image_reshaped = image_flattened.reshape(1, -1)
+
+    # Predict using the model
+    prediction = model.predict(image_reshaped) # Pass the reshaped image
+    return prediction
+
+# Test the detection function
+sample_prediction = detect_pedestrians(image, grid_search.best_estimator_)
+print("Pedestrian detected:", bool(sample_prediction))
