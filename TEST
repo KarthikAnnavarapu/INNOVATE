@@ -1,0 +1,27 @@
+# Test on a new sample image
+test_image_url = "https://callsam.com/wp-content/uploads/2019/12/crosswalk-featured-750x500.jpg"
+
+# Try accessing the URL with a web browser to see if it loads correctly and if there are any visible access restrictions.
+
+# If the image is accessible in a browser, try using a different library to download the image,
+# such as 'requests' which often handles website restrictions better:
+import requests
+try:
+    response = requests.get(test_image_url)
+    response.raise_for_status()  # Raise an exception for bad status codes
+    test_image = np.asarray(bytearray(response.content), dtype="uint8")
+    test_image = cv2.imdecode(test_image, cv2.IMREAD_COLOR)
+except requests.exceptions.RequestException as e:
+    print(f"Error downloading image: {e}")
+
+# If the issue persists, consider using a different image from a source that allows free access.
+# For example, you can search for royalty-free images on websites like Unsplash or Pixabay.
+
+# Detect pedestrians (if the image was successfully downloaded)
+if 'test_image' in locals():
+    test_prediction = detect_pedestrians(test_image, grid_search.best_estimator_)
+
+    # Display the result
+    plt.imshow(cv2.cvtColor(test_image, cv2.COLOR_BGR2RGB))
+    plt.title(f'Pedestrian detected: {bool(test_prediction)}')
+    plt.show()
