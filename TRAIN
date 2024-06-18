@@ -1,0 +1,49 @@
+# Load image using urlopen
+image_url = "https://www.queenscliffe.vic.gov.au/files/assets/public/images/your-council/news-thumbnails/gellibrand-street-crossing.jpg?w=1200"  # Replace with a valid URL
+resp = urlopen(image_url)
+image = np.asarray(bytearray(resp.read()), dtype="uint8")
+image = cv2.imdecode(image, cv2.IMREAD_COLOR) # Use imdecode to read image from URL
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert to RGB
+# Resize image
+image_resized = cv2.resize(image, (1280, 720))
+plt.imshow(image_resized)
+plt.show()
+# Convert to grayscale
+gray_image = color.rgb2gray(image_resized)
+
+# Extract HOG features
+hog_features, hog_image = hog(gray_image, pixels_per_cell=(32, 32),
+                              cells_per_block=(1, 1), visualize=True, feature_vector=True, block_norm='L1')
+# Import the exposure module from skimage
+from skimage import exposure
+
+# Rescale the HOG image
+hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 10))
+
+# Display HOG image
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6), sharex=True, sharey=True)
+ax1.axis('off')
+ax1.imshow(image_resized, cmap=plt.cm.gray)
+ax1.set_title('Input image')
+ax2.axis('off')
+ax2.imshow(hog_image_rescaled, cmap=plt.cm.gray)
+ax2.set_title('Histogram of Oriented Gradients')
+plt.show()
+# Load a sample dataset
+digits = datasets.load_digits()
+X, y = digits.data, digits.target == 1  # Binary classification for demonstration
+
+# Split the dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Train SVM model
+svm_model = LinearSVC()
+svm_model.fit(X_train, y_train)
+
+param_grid = {'C': [0.1, 1, 10, 100]}
+grid_search = GridSearchCV(LinearSVC(), param_grid, cv=5)
+grid_search.fit(X_train, y_train)
+
+print("Best parameters found:", grid_search.best_params_)
+y_pred = grid_search.predict(X_test)
+print(classification_report(y_test, y_pred, target_names=["Non-Pedestrian", "Pedestrian"]))
